@@ -1,0 +1,90 @@
+/* FocusRead — styles */
+
+/* Every wrapped word. inline-block is required for transform to apply. */
+.fr-word {
+  display: inline-block;
+  position: relative;
+  transform-origin: 50% 85%;
+  transition:
+    transform 90ms ease-out,
+    opacity 90ms ease-out,
+    margin 90ms ease-out;
+}
+
+/* Give the active paragraph a little extra vertical breathing room so
+   the magnified word doesn't collide with the lines above/below. */
+.fr-active {
+  line-height: 1.8 !important;
+  transition: line-height 150ms ease-out;
+}
+
+/* Dim everything in the hovered paragraph...
+   (opacity instead of grey text colour so it works on dark themes too,
+   and never drops below readable contrast) */
+.fr-active .fr-word {
+  opacity: 0.45;
+}
+
+/* ...except the neighbours of the focused word...
+   (scale values must stay in sync with SCALE_NEAR/SCALE_FOCUS in
+   content.js — the JS reserves margins to match, so words shift away
+   instead of overlapping) */
+.fr-active .fr-word.fr-near {
+  opacity: 1;
+  transform: scale(1.15);
+  z-index: 2;
+}
+
+/* ...and the focused word itself. */
+.fr-active .fr-word.fr-focus {
+  opacity: 1;
+  transform: scale(1.4);
+  z-index: 3;
+}
+
+/* Floating on/off button */
+.fr-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2147483647;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font: 700 16px/1 system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: background 150ms ease, opacity 150ms ease;
+}
+
+.fr-toggle:hover {
+  background: #1d4ed8;
+}
+
+.fr-toggle.fr-off {
+  background: #6b7280;
+  opacity: 0.7;
+}
+
+/* On/off toast */
+.fr-toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2147483647;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(20, 20, 20, 0.85);
+  color: #fff;
+  font: 14px/1.4 system-ui, sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.fr-toast-visible {
+  opacity: 1;
+}

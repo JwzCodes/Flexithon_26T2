@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FocusRead demo</title>
+<link rel="stylesheet" href="content.css">
+<style>
+  body { max-width: 680px; margin: 40px auto; padding: 0 20px;
+         font: 18px/1.7 Georgia, serif; color: #222; }
+  h1 { font-family: system-ui, sans-serif; }
+  .hint { font: 14px/1.5 system-ui, sans-serif; color: #666;
+          border-left: 3px solid #ccc; padding-left: 12px; }
+</style>
+</head>
+<body>
+<h1>FocusRead demo</h1>
+<p class="hint">Move your mouse over the text below. The word under the
+cursor grows, its neighbours grow slightly, and the rest of the paragraph
+dims. Toggle with the blue button (bottom right), Option+D (Mac), or
+Ctrl+D. (This page just loads the same content.js + content.css the
+extension uses — no install needed.)</p>
+
+<p>Dyslexia is a learning difficulty that primarily affects the skills
+involved in accurate and fluent word reading and spelling. It is not
+related to intelligence, and it affects roughly one in ten people. Dense
+pages of text, like university readings or long encyclopedia articles,
+can be especially tiring because every line competes for attention at
+once.</p>
+
+<p>Visual crowding is one of the mechanisms researchers point to: when
+letters and words are packed closely together, the ones you are not
+reading interfere with the one you are. Reducing that interference — by
+spacing text out, or by visually promoting the word being read — can
+make long reading sessions noticeably less fatiguing.</p>
+
+<p>FocusRead promotes the word under your cursor and its immediate
+neighbours while gently dimming the rest of the paragraph. Because the
+magnification uses a transform rather than a font-size change, the
+surrounding text never reflows or jumps while you read.</p>
+
+<script src="content.js"></script>
+</body>
+</html>
