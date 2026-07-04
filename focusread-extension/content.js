@@ -12,8 +12,8 @@
 (() => {
   'use strict';
 
-  const SCALE_FOCUS = 1.4;   // keep in sync with content.css
-  const SCALE_NEAR = 1.15;
+  const SCALE_FOCUS = 1.2;   // keep in sync with content.css
+  const SCALE_NEAR = 1.05;
 
   // Elements we treat as a "paragraph" (the dimming context).
   const BLOCK_SELECTOR = 'p, li, dd, dt, blockquote, caption, figcaption';
@@ -35,6 +35,18 @@
   const processed = new WeakSet(); // blocks already word-wrapped
 
   /* ---------------------------------------------------------- wrapping */
+
+  const font = new FontFace(
+    "OpenDyslexic",
+    `url(${chrome.runtime.getURL("fonts/OpenDyslexic-Regular.otf")})`
+  );
+
+  font.load().then((loadedFont) => {
+    document.fonts.add(loadedFont);
+    console.log("OpenDyslexic loaded");
+  }).catch((error) => {
+    console.error("OpenDyslexic failed to load:", error);
+  });
 
   function wrapWords(block) {
     if (processed.has(block)) return;
@@ -83,9 +95,12 @@
   // width the scaled word needs, so neighbours slide away (no overlap).
   function decorate(span, cls, scale) {
     const w = span.getBoundingClientRect().width;
+
     const extra = ((scale - 1) * w) / 2 + 1;
+
     span.style.marginLeft = extra + 'px';
     span.style.marginRight = extra + 'px';
+
     span.classList.add(cls);
     decorated.push(span);
   }
@@ -97,13 +112,60 @@
       s.style.marginRight = '';
     }
     decorated = [];
-    focusSpan = null;
   }
 
   function deactivateBlock() {
     if (activeBlock) activeBlock.classList.remove('fr-active');
     activeBlock = null;
     clearDecorations();
+    focusSpan = null;
+  }
+
+  function getStableFocusedWord(block, mouseX, mouseY) {
+    const words = Array.from(block.querySelectorAll('.fr-word'));
+    if (!words.length) return null;
+
+    let bestWord = null;
+    let bestDistance = Infinity;
+
+    for (const word of words) {
+      const rect = word.getBoundingClientRect();
+
+      // Ignore words that are not on the same line as the mouse.
+      if (mouseY < rect.top - 4 || mouseY > rect.bottom + 4) {
+        continue;
+      }
+
+      const centreX = rect.left + rect.width / 2;
+      const distance = Math.abs(mouseX - centreX);
+
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestWord = word;
+      }
+    }
+
+    if (!bestWord) return focusSpan;
+
+    const rect = bestWord.getBoundingClientRect();
+    const centreX = rect.left + rect.width / 2;
+
+    // Dead zone: if the mouse is too far from the centre of the candidate word,
+    // keep the current focused word instead of switching.
+    const switchThreshold = Math.max(8, rect.width * 0.15);
+
+    if (focusSpan && bestWord !== focusSpan) {
+      const currentRect = focusSpan.getBoundingClientRect();
+      const currentCentreX = currentRect.left + currentRect.width / 2;
+      const currentDistance = Math.abs(mouseX - currentCentreX);
+
+      // Only switch if the new word is clearly closer than the current word.
+      if (bestDistance + switchThreshold > currentDistance) {
+        return focusSpan;
+      }
+    }
+
+    return bestWord;
   }
 
   function update() {
@@ -125,11 +187,15 @@
       block.classList.add('fr-active');
     }
 
-    const word = el.closest('.fr-word');
+    // const word = el.closest('.fr-word');
+    const word = getStableFocusedWord(activeBlock, lastX, lastY);
     if (word === focusSpan) return; // nothing changed
 
     clearDecorations();
-    if (!word || !block.contains(word)) return;
+    if (!word || !block.contains(word)) {
+      focusSpan = null;
+      return;
+    }
 
     focusSpan = word;
     const list = Array.prototype.slice.call(

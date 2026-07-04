@@ -4,11 +4,11 @@
 .fr-word {
   display: inline-block;
   position: relative;
+  margin: 0 0.20em;
   transform-origin: 50% 85%;
   transition:
     transform 90ms ease-out,
-    opacity 90ms ease-out,
-    margin 90ms ease-out;
+    opacity 90ms ease-out;
 }
 
 /* Give the active paragraph a little extra vertical breathing room so
@@ -23,6 +23,7 @@
    and never drops below readable contrast) */
 .fr-active .fr-word {
   opacity: 0.45;
+  font-family: "OpenDyslexic", sans-serif;
 }
 
 /* ...except the neighbours of the focused word...
@@ -31,14 +32,14 @@
    instead of overlapping) */
 .fr-active .fr-word.fr-near {
   opacity: 1;
-  transform: scale(1.15);
+  transform: scale(1.05);
   z-index: 2;
 }
 
 /* ...and the focused word itself. */
 .fr-active .fr-word.fr-focus {
   opacity: 1;
-  transform: scale(1.4);
+  transform: scale(1.2);
   z-index: 3;
 }
 
