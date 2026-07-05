@@ -1,6 +1,21 @@
 /* FocusRead — styles */
 
-/* Every wrapped word. inline-block is required for transform to apply. */
+/* OpenDyslexic, declared here so it works BOTH as an extension (the
+   relative URL resolves to the extension bundle — enabled by the
+   web_accessible_resources entry in manifest.json) AND in demo.html
+   (resolves to the local fonts/ folder). The FontFace loader in
+   content.js is a redundant backup for the extension context. */
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("fonts/OpenDyslexic-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Every wrapped word. inline-block is required for transform to apply.
+   The extra margin (word spacing) is applied here — page-wide, in one
+   pass at load — so nothing shifts on hover. */
 .fr-word {
   display: inline-block;
   position: relative;
@@ -11,11 +26,11 @@
     opacity 90ms ease-out;
 }
 
-/* Give the active paragraph a little extra vertical breathing room so
-   the magnified word doesn't collide with the lines above/below. */
-.fr-active {
-  line-height: 1.8 !important;
-  transition: line-height 150ms ease-out;
+/* OpenDyslexic is a toggle ("Dys" button / Option+F / Ctrl+F).
+   Toggling it reflows the page once — that's expected, it's a
+   deliberate user action, not a hover side effect. */
+.fr-font .fr-word {
+  font-family: "OpenDyslexic", sans-serif;
 }
 
 /* Dim everything in the hovered paragraph...
@@ -23,51 +38,278 @@
    and never drops below readable contrast) */
 .fr-active .fr-word {
   opacity: 0.45;
-  font-family: "OpenDyslexic", sans-serif;
 }
 
-/* ...except the neighbours of the focused word...
-   (scale values must stay in sync with SCALE_NEAR/SCALE_FOCUS in
-   content.js — the JS reserves margins to match, so words shift away
-   instead of overlapping) */
-.fr-active .fr-word.fr-near {
+/* ...keep the line currently being read a bit brighter (line tracking)... */
+.fr-active .fr-word.fr-line {
+  opacity: 0.7;
+}
+
+/* ...the neighbours of the focused word grow slightly...
+   (the .fr-ruler-on selectors make the magnifier work inside ruler mode) */
+.fr-active .fr-word.fr-near,
+.fr-ruler-on .fr-word.fr-near {
   opacity: 1;
   transform: scale(1.05);
   z-index: 2;
 }
 
-/* ...and the focused word itself. */
-.fr-active .fr-word.fr-focus {
+/* ...and the focused word is unmistakable: biggest, full contrast,
+   faux-bold via text-shadow (real bold would change width and cause
+   layout shift), plus an accent underline. */
+.fr-active .fr-word.fr-focus,
+.fr-ruler-on .fr-word.fr-focus {
   opacity: 1;
   transform: scale(1.2);
   z-index: 3;
+  text-shadow: 0 0 0.6px currentColor;
+  text-decoration: underline;
+  text-decoration-color: #2563eb;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
-/* Floating on/off button */
-.fr-toggle {
+/* Bionic reading: bold word-prefixes */
+b.fr-bio {
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------- control stack */
+
+/* All buttons live in one flex column. column-reverse = first child
+   (the launcher) renders at the bottom. */
+.fr-controls {
   position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 2147483647;
-  width: 48px;
-  height: 48px;
-  border: none;
-  border-radius: 50%;
-  background: #2563eb;
-  color: #fff;
-  font: 700 16px/1 system-ui, sans-serif;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: background 150ms ease, opacity 150ms ease;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 8px;
 }
 
-.fr-toggle:hover {
+.fr-controls button {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #2563eb;
+  border-radius: 50%;
+  background: #fff;
+  color: #2563eb;
+  font: 700 13px/1 system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: background 150ms ease, color 150ms ease, opacity 150ms ease;
+}
+
+.fr-controls button:hover {
+  background: #eff6ff;
+}
+
+/* Collapsed (default): only the launcher shows — plus the TTS button
+   while it's reading, so playback stays reachable. */
+.fr-controls:not(.fr-open) button {
+  display: none;
+}
+
+.fr-controls:not(.fr-open) .fr-launcher,
+.fr-controls:not(.fr-open) .fr-tts-btn.fr-on {
+  display: block;
+}
+
+/* Launcher */
+.fr-launcher {
+  font-size: 18px;
+}
+
+/* Master on/off — filled style */
+.fr-controls .fr-toggle {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+}
+
+.fr-controls .fr-toggle:hover {
   background: #1d4ed8;
 }
 
-.fr-toggle.fr-off {
+.fr-controls .fr-toggle.fr-off {
   background: #6b7280;
   opacity: 0.7;
+}
+
+/* Active states */
+.fr-controls .fr-bio-btn.fr-on,
+.fr-controls .fr-ruler-btn.fr-on,
+.fr-controls .fr-font-btn.fr-on,
+.fr-controls .fr-tts-btn.fr-on {
+  background: #2563eb;
+  color: #fff;
+}
+
+.fr-controls .fr-tint-btn.fr-on {
+  background: #fff3d6;
+  color: #92400e;
+  border-color: #92400e;
+}
+
+.fr-controls .fr-tts-btn {
+  font-size: 14px;
+}
+
+/* TTS speed panel (visible while reading aloud; JS keeps it aligned
+   with wherever the TTS button currently is) */
+.fr-tts-panel {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 76px;
+  z-index: 2147483647;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  font: 600 12px/1 system-ui, sans-serif;
+  color: #374151;
+}
+
+.fr-tts-panel.fr-show {
+  display: flex;
+}
+
+.fr-tts-panel input[type="range"] {
+  width: 140px;
+  accent-color: #2563eb;
+}
+
+/* ----------------------------------------------------- word finder */
+
+.fr-finder {
+  display: none;
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, 92vw);
+  z-index: 2147483647;
+  padding: 18px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  font: 14px/1.5 system-ui, sans-serif;
+  color: #1f2937;
+}
+
+.fr-finder.fr-show {
+  display: block;
+}
+
+.fr-finder-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.fr-finder-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  font: 15px/1.4 system-ui, sans-serif;
+  color: #111;
+  background: #fff;
+}
+
+.fr-finder-status {
+  margin: 10px 0 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.fr-finder-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.fr-finder-chip {
+  padding: 8px 14px;
+  border: 2px solid #2563eb;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font: 600 14px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.fr-finder-chip:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+.fr-finder-key {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 11px;
+  color: #9ca3af;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------- overlays */
+
+/* Pastel screen tint: multiply turns white into the tint colour while
+   text stays dark. Sits under the ruler masks. */
+.fr-tint {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483630;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Reading ruler: two dimming masks + a clear band over the current line.
+   Hidden unless <body> has .fr-ruler-on. */
+.fr-ruler-mask,
+.fr-ruler-band {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 2147483640; /* below the control buttons */
+  pointer-events: none;
+}
+
+.fr-ruler-on .fr-ruler-mask,
+.fr-ruler-on .fr-ruler-band {
+  display: block;
+}
+
+.fr-ruler-mask {
+  background: rgba(15, 15, 15, 0.45);
+  transition: top 80ms ease-out, height 80ms ease-out;
+}
+
+.fr-ruler-top {
+  top: 0;
+}
+
+.fr-ruler-bottom {
+  bottom: 0;
+}
+
+/* Soft tint so the active line reads as "highlighted", not just spared */
+.fr-ruler-band {
+  background: rgba(255, 213, 79, 0.10);
+  box-shadow: 0 1px 0 rgba(255, 213, 79, 0.35) inset,
+              0 -1px 0 rgba(255, 213, 79, 0.35) inset;
+  transition: top 80ms ease-out, height 80ms ease-out;
 }
 
 /* On/off toast */
