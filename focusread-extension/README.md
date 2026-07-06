@@ -1,4 +1,4 @@
-# FocusRead — Dyslexia Reading Lens (prototype)
+# Word Lock — Dyslexia Reading Lens (prototype)
 
 Magnifies the word under your cursor (plus the word before and after) and
 dims the rest of the paragraph, reducing visual crowding on text-heavy
@@ -108,7 +108,7 @@ Firefox install (signing / AMO) you must add an ID to `manifest.json`:
 
 ```json
 "browser_specific_settings": {
-  "gecko": { "id": "focusread@yourteam.example" }
+  "gecko": { "id": "wordlock@yourteam.example" }
 }
 ```
 

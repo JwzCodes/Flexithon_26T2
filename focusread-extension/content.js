@@ -1,5 +1,5 @@
 /*
- * FocusRead — content script
+ * Word Lock — content script
  *
  * Magnifies the word under the cursor (+ same-line neighbours) IN PLACE
  * over the dimmed paragraph. Zero layout movement while reading: word
@@ -1063,7 +1063,7 @@
     }
     document.body.classList.toggle('fr-ruler-on', ruler && enabled);
     if (toggleBtn) toggleBtn.classList.toggle('fr-off', !enabled);
-    showToast(enabled ? 'FocusRead: on' : 'FocusRead: off');
+    showToast(enabled ? 'Word Lock: on' : 'Word Lock: off');
   }
 
   // Collapse/expand the stack. While TTS plays, its button (and the
@@ -1073,8 +1073,8 @@
     if (controlsEl) controlsEl.classList.toggle('fr-open', open);
     if (launcherBtn) {
       launcherBtn.textContent = open ? '✕' : '☰';
-      launcherBtn.title = open ? 'Collapse FocusRead controls'
-                               : 'FocusRead controls';
+      launcherBtn.title = open ? 'Collapse Word Lock controls'
+                               : 'Word Lock controls';
     }
     positionTtsPanel();
   }
@@ -1117,15 +1117,15 @@
       return b;
     };
 
-    launcherBtn = mkBtn('fr-launcher', '☰', 'FocusRead controls',
-      'FocusRead controls', () => {
+    launcherBtn = mkBtn('fr-launcher', '☰', 'Word Lock controls',
+      'Word Lock controls', () => {
         clearTimeout(collapseTimer);
         setControlsOpen(!controlsOpen);
       });
 
     toggleBtn = mkBtn('fr-toggle', 'Aa',
-      'Toggle FocusRead on/off (Option+D or Ctrl+D)',
-      'Toggle FocusRead', () => setEnabled(!enabled));
+      'Toggle Word Lock on/off (Option+D or Ctrl+D)',
+      'Toggle Word Lock', () => setEnabled(!enabled));
 
     bioBtn = mkBtn('fr-bio-btn', 'Bio',
       'Toggle bionic reading (Option+B or Ctrl+B)',
