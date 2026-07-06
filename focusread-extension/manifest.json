@@ -5,16 +5,26 @@
   "description": "Magnifies the word under your cursor (plus its neighbours) and dims the rest of the paragraph to reduce visual crowding.",
   "content_scripts": [
     {
-      "matches": ["*://*.wikipedia.org/*"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["fonts/OpenDyslexic-Regular.otf"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "fonts/OpenDyslexic-Regular.otf"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }

@@ -602,9 +602,10 @@
   // Engines:
   //  - Default: Datamuse reverse dictionary (free, NO API key needed —
   //    the demo can never fail because of a missing/blocked key).
-  //  - Optional: Claude, if the user pastes their own API key at
-  //    runtime. The key lives ONLY in chrome.storage.local (or
-  //    localStorage in demo.html). IT IS NEVER WRITTEN INTO THIS REPO.
+  //  - Optional: DeepSeek (cheap pay-per-use, OpenAI-compatible API),
+  //    if the user pastes their own API key at runtime. The key lives
+  //    ONLY in chrome.storage.local (or localStorage in demo.html).
+  //    IT IS NEVER WRITTEN INTO THIS REPO.
 
   let finderEl = null;
   let finderInput = null;
@@ -618,13 +619,13 @@
       try {
         if (typeof chrome !== 'undefined' && chrome.storage &&
             chrome.storage.local) {
-          chrome.storage.local.get(['anthropicKey'],
-            (v) => resolve((v && v.anthropicKey) || ''));
+          chrome.storage.local.get(['aiKey'],
+            (v) => resolve((v && v.aiKey) || ''));
           return;
         }
       } catch (e) { /* fall through */ }
       try {
-        resolve(window.localStorage.getItem('fr-anthropic-key') || '');
+        resolve(window.localStorage.getItem('fr-ai-key') || '');
       } catch (e) {
         resolve('');
       }
@@ -635,14 +636,14 @@
     try {
       if (typeof chrome !== 'undefined' && chrome.storage &&
           chrome.storage.local) {
-        if (key) chrome.storage.local.set({ anthropicKey: key });
-        else chrome.storage.local.remove('anthropicKey');
+        if (key) chrome.storage.local.set({ aiKey: key });
+        else chrome.storage.local.remove('aiKey');
         return;
       }
     } catch (e) { /* fall through */ }
     try {
-      if (key) window.localStorage.setItem('fr-anthropic-key', key);
-      else window.localStorage.removeItem('fr-anthropic-key');
+      if (key) window.localStorage.setItem('fr-ai-key', key);
+      else window.localStorage.removeItem('fr-ai-key');
     } catch (e) { /* ignore */ }
   }
 
@@ -669,42 +670,51 @@
     return out;
   }
 
-  async function claudeWords(desc, key) {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+  async function deepseekWords(desc, key) {
+    const r = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
+        'authorization': 'Bearer ' + key
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
+        model: 'deepseek-chat',
         max_tokens: 100,
-        system: 'Someone with dyslexia is trying to recall a word they ' +
-          'can only describe. Reply with ONLY a comma-separated list of ' +
-          '5-8 candidate words, most likely first. No other text.',
-        messages: [{ role: 'user', content: desc }]
+        messages: [
+          {
+            role: 'system',
+            content: 'Someone with dyslexia is trying to recall a word ' +
+              'they can only describe. Reply with ONLY a comma-separated ' +
+              'list of 5-8 candidate words, most likely first. No other text.'
+          },
+          { role: 'user', content: desc }
+        ]
       })
     });
-    if (!r.ok) throw new Error('claude ' + r.status);
+    if (!r.ok) throw new Error('deepseek ' + r.status);
     const j = await r.json();
-    const text = (j.content && j.content[0] && j.content[0].text) || '';
+    const text = (j.choices && j.choices[0] && j.choices[0].message &&
+      j.choices[0].message.content) || '';
     return text.split(/[,\n]/)
       .map((s) => s.trim().replace(/^\d+[.)]\s*/, ''))
       .filter(Boolean)
       .slice(0, 8);
   }
 
+  let lastEngine = 'Datamuse';
+
   async function findWords(desc) {
     const key = await getApiKey();
     if (key) {
       try {
-        return await claudeWords(desc, key);
+        const words = await deepseekWords(desc, key);
+        lastEngine = 'DeepSeek';
+        return words;
       } catch (e) {
         // fall back silently — the demo must not die on a bad key
       }
     }
+    lastEngine = 'Datamuse';
     return datamuseWords(desc);
   }
 
@@ -744,11 +754,12 @@
           'No matches — describe what it DOES or is FOR ' +
           '(e.g. "wooden tool you write with").';
       } else if (hasKey) {
-        finderStatus.textContent = 'Click a word to copy it:';
+        finderStatus.textContent =
+          'Click a word to copy it (via ' + lastEngine + '):';
       } else {
         finderStatus.textContent =
           'Click a word to copy it. Not there? Describe what it does ' +
-          '— or add a Claude key (link below) for smarter matching.';
+          '— or add a DeepSeek key (link below) for smarter matching.';
       }
       renderFinderResults(words);
     } catch (e) {
@@ -761,8 +772,8 @@
     if (!finderKeyLink) return;
     const key = await getApiKey();
     finderKeyLink.textContent = key
-      ? 'Engine: Claude (your key) · remove key'
-      : 'Engine: Datamuse (no key) · use Claude with your own API key…';
+      ? 'Engine: DeepSeek (your key) · remove key'
+      : 'Engine: Datamuse (no key) · use DeepSeek with your own API key…';
   }
 
   function makeFinder() {
@@ -804,15 +815,15 @@
       const existing = await getApiKey();
       if (existing) {
         storeApiKey('');
-        showToast('Claude key removed');
+        showToast('DeepSeek key removed');
       } else {
         const k = window.prompt(
-          'Paste your Anthropic API key.\n' +
+          'Paste your DeepSeek API key (platform.deepseek.com).\n' +
           'Stored only in your browser — never in the code or repo.'
         );
         if (k && k.trim()) {
           storeApiKey(k.trim());
-          showToast('Claude key saved (browser storage only)');
+          showToast('DeepSeek key saved (browser storage only)');
         }
       }
       updateFinderKeyLink();
