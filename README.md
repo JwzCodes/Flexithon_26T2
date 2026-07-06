@@ -44,6 +44,15 @@ work regardless of collapse state.
   can't recall it. Type the description ("fear of small spaces"),
   press Enter, and click a suggestion to copy it (it's also spoken
   aloud so you hear the pronunciation). Esc closes.
+- **Bionic reading:** "Bio" button or **Option/Ctrl+B**.
+  Bolds roughly the first half of every word page-wide, independent of
+  the focus effect — the two can be A/B tested separately or combined.
+- **Arrow keys:** Left/Right = previous/next word, Up/Down =
+  previous/next visual line (keeping your horizontal reading position,
+  like a text-editor caret). Focus follows automatically across paragraph
+  boundaries and scrolls the page when needed. Small accidental trackpad
+  nudges won't steal focus from keyboard navigation; a deliberate mouse
+  movement (>15px) takes over again.
 
 ## Word finder engines & API keys
 
@@ -59,15 +68,6 @@ file here and it must stay that way — keys pasted at runtime live only
 in browser storage, which is not committed to git. If a key ever lands
 in a commit, revoke it immediately in the Anthropic console and rewrite
 the history before pushing.
-- **Bionic reading:** "Bio" button or **Option/Ctrl+B**.
-  Bolds roughly the first half of every word page-wide, independent of
-  the focus effect — the two can be A/B tested separately or combined.
-- **Arrow keys:** Left/Right = previous/next word, Up/Down =
-  previous/next visual line (keeping your horizontal reading position,
-  like a text-editor caret). Focus follows automatically across paragraph
-  boundaries and scrolls the page when needed. Small accidental trackpad
-  nudges won't steal focus from keyboard navigation; a deliberate mouse
-  movement (>15px) takes over again.
 
 ## Line-aware behaviour
 
