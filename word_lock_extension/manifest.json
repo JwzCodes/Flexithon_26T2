@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Word Lock — Dyslexia Reading Lens",
   "version": "0.1.0",
-  "description": "Magnifies the word under your cursor (plus its neighbours) and dims the rest of the paragraph to reduce visual crowding.",
+  "description": "Magnify the word under your cursor (plus its neighbours) and dim the rest of the paragraph to reduce visual crowding.",
   "content_scripts": [
     {
       "matches": [
