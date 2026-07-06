@@ -49,15 +49,18 @@ work regardless of collapse state.
 
 - **Default: Datamuse reverse dictionary** — free, no API key, so the
   demo can never fail because of a key. No setup needed.
-- **Optional: Claude** — click the small link at the bottom of the
-  finder panel and paste your own Anthropic API key. The key is stored
-  in `chrome.storage.local` (or localStorage on the demo page) **on
-  your machine only**.
+- **Optional: DeepSeek** — click the small link at the bottom of the
+  finder panel and paste your own DeepSeek API key (from
+  platform.deepseek.com — note: pay-per-use, very cheap, but **not**
+  free; the free path is Datamuse). The key is stored in
+  `chrome.storage.local` (or localStorage on the demo page) **on your
+  machine only**. The results line shows which engine answered; if the
+  DeepSeek call fails for any reason it silently falls back to Datamuse.
 
 ⚠️ **NEVER hardcode an API key in this repo.** There are no keys in any
 file here and it must stay that way — keys pasted at runtime live only
 in browser storage, which is not committed to git. If a key ever lands
-in a commit, revoke it immediately in the Anthropic console and rewrite
+in a commit, revoke it immediately in the DeepSeek console and rewrite
 the history before pushing.
 - **Bionic reading:** "Bio" button or **Option/Ctrl+B**.
   Bolds roughly the first half of every word page-wide, independent of
